@@ -80,9 +80,15 @@ public class CubeManager : MonoBehaviour {
         else if (isPossible && Input.GetKeyDown(KeyCode.Space))
         {
             anyMove = false;
-            ClearCube();
+            //ClearCube();
             RandomizeCube();
             cam.GetComponent<Camera>().backgroundColor = Color.white;
+        }
+        else if (isPossible && Input.GetKeyDown(KeyCode.Backspace))
+        {
+            anyMove = false;
+            cam.GetComponent<Camera>().backgroundColor = Color.white;
+            ClearCube();
         }
         if (GameEnd()==End)
         {
@@ -244,8 +250,8 @@ public class CubeManager : MonoBehaviour {
 
     void RandomizeCube()
     {
-        //Rotations(X, 2, Vector3.left);
+        Rotations(X, 2, Vector3.left);
         Rotations(Y, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.up);
-        //Rotations(Z, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.forward);
+        Rotations(Z, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.forward);
     }
 }   
