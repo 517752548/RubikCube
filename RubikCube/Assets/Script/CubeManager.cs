@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class CubeManager : MonoBehaviour {
     bool isPossible = true;
+    bool isShuffle = false;
     bool anyMove = false;
     const int randomCnt = 2;
     const int Size = 3;
@@ -21,16 +22,18 @@ public class CubeManager : MonoBehaviour {
     const int foward = 4;
     const int back = 5;
     const int End = 2;
+    float wait = 0f;
     float rand;
     public GameObject[,,] allCube = new GameObject[3,3,3];
     public GameObject prefabCube;
     public GameObject cam;
+    IEnumerator[] arrIenum = new IEnumerator[100];
+    IEnumerator previous = null, current = null;
 
-
-	void Start () {
+    void Start () {
         CreateCube();
 	}
-	
+    
 	void Update () {
         if (isPossible && Input.GetKeyDown(KeyCode.Q))
         {
@@ -79,10 +82,16 @@ public class CubeManager : MonoBehaviour {
         }
         else if (isPossible && Input.GetKeyDown(KeyCode.Space))
         {
-            anyMove = false;
+            anyMove = false; isShuffle = true; 
             //ClearCube();
-            RandomizeCube();
+            for(int count=0; count<30;++count)
+            {
+                Debug.Log(count);
+                RandomizeCube(); wait += 0.4f;
+            }
             cam.GetComponent<Camera>().backgroundColor = Color.white;
+            current = null; previous =null; isShuffle = false;
+            wait = 0f;
         }
         else if (isPossible && Input.GetKeyDown(KeyCode.Backspace))
         {
@@ -117,7 +126,10 @@ public class CubeManager : MonoBehaviour {
     // X = UP DOWN, Y = LEFT RIGHT, Z = FOWARD BACK
     IEnumerator CubeRotations(int xyz, int layer, Vector3 shaft)
     {
-        isPossible = false;
+        yield return new WaitForSeconds(wait);
+        //if(isShuffle)
+        //    yield return StartCoroutine(current);
+        isPossible = false; 
         int angle = 0;
         List<GameObject> listCube = new List<GameObject>();
         for(int i=0; i<Size; ++i)
@@ -149,6 +161,7 @@ public class CubeManager : MonoBehaviour {
 
     void Rotations(int xyz, int layer, Vector3 shaft)
     {
+        int angle = 0;
         isPossible = false;
         List<GameObject> listCube = new List<GameObject>();
         for (int i = 0; i < Size; ++i)
@@ -166,10 +179,16 @@ public class CubeManager : MonoBehaviour {
                 }
             }
         }
-        for (int i = 0; i < groupSize; ++i) { 
-            listCube[i].transform.RotateAround(new Vector3(1f, 1f, 1f), shaft, 90f);
+        while (angle < 90)
+        {
+            for (int i = 0; i < groupSize; ++i)
+            {
+                listCube[i].transform.RotateAround(new Vector3(1f, 1f, 1f), shaft, 5f);
+            }
+            angle += 5;
         }
         isPossible = true;
+
     }
 
     void ClearCube()
@@ -250,8 +269,24 @@ public class CubeManager : MonoBehaviour {
 
     void RandomizeCube()
     {
-        Rotations(X, 2, Vector3.left);
-        Rotations(Y, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.up);
-        Rotations(Z, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.forward);
+        int rand = Mathf.RoundToInt(Random.Range(0f, 10f) % 3);
+        if (rand == 0)
+        {
+            StartCoroutine(previous = CubeRotations(X, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.left));
+            current = previous;
+        }
+        else if (rand == 1)
+        {
+            StartCoroutine(previous = CubeRotations(Y, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.up));
+            current = previous;
+        }
+        else if (rand == 2)
+        {
+            StartCoroutine(previous = CubeRotations(Z, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.forward));
+            current = previous;
+        }
+        //Rotations(X, 2, Vector3.left);
+        //Rotations(Y, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.up);
+        //Rotations(Z, Mathf.RoundToInt(Random.Range(0f, 9f)) % 3, Vector3.forward);
     }
 }   
